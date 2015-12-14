@@ -10,6 +10,14 @@ var app = require('../../server');
 var Word = require('../../app/models/word');
 var Counter = require('../../app/models/counter');
 
+var cookieParser = function(cookie) {
+  return cookie.reduce(function(obj, cookie) {
+    var keyValue = cookie.split(';')[0].split('=');
+    obj[keyValue[0]] = keyValue[1];
+    return obj;
+  }, {});
+};
+
 describe('Routes', function() {
 
   var con;
@@ -121,9 +129,11 @@ describe('Routes', function() {
       });
 
       it('should restart at the first word', function(done) {
-        request(app)
-          .get('/api/words/index?word_index=1')
-          .expect(function(resp) {
+        var req = request(app).get('/api/words/index?');
+
+        req.cookies = 'word_index=1';
+
+        req.expect(function(resp) {
             expect(resp.body.word_index).to.equal(0);
           })
           .end(done);
@@ -135,10 +145,10 @@ describe('Routes', function() {
         req.cookies = 'word_index=0';
 
         req.expect(function(resp) {
-            //console.log(resp.headers);
+
             expect(resp.headers['set-cookies']).to.not.equal(null);
-            var cookie = resp.headers['set-cookie'].pop().split(';')[0];
-            expect(cookie).to.equal('word_index=1');
+            var cookie = cookieParser(resp.headers['set-cookie']);
+            expect(cookie.word_index).to.equal('1');
           })
           .end(done);
       });
@@ -151,8 +161,22 @@ describe('Routes', function() {
         req.expect(function(resp) {
             //console.log(resp.headers);
             expect(resp.headers['set-cookies']).to.not.equal(null);
-            var cookie = resp.headers['set-cookie'].pop().split(';')[0];
-            expect(cookie).to.equal('word_index=0');
+            var cookie = cookieParser(resp.headers['set-cookie']);
+            expect(cookie.word_index).to.equal('0');
+          })
+          .end(done);
+      });
+
+      it('should handle word indexes that do not exist', function(done) {
+        var req = request(app).get('/api/words/index?word_index=1');
+
+        req.cookies = 'word_index=5000';
+
+        req.expect(function(resp) {
+            //console.log(resp.headers);
+            expect(resp.headers['set-cookies']).to.not.equal(null);
+            var cookie = cookieParser(resp.headers['set-cookie']);
+            expect(cookie.word_index).to.equal('0');
           })
           .end(done);
       });
@@ -164,13 +188,16 @@ describe('Routes', function() {
           .end(done);
       });
 
-      it('should reject requests without word_index query', function(done) {
+      it('should assign a response cookie even if there is no request cookie set', function(done){
         request(app)
           .get('/api/words/index?language=english')
-          .expect(400)
+          .expect(function(resp){
+            expect(resp.headers['set-cookies']).to.not.equal(null);
+            var cookie = cookieParser(resp.headers['set-cookie']);
+            expect(cookie.word_index).to.equal('0');
+          })
           .end(done);
       });
-
     });
 
     describe('Audio API', function() {
