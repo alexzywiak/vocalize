@@ -31,6 +31,7 @@ switch(flags[0]){
   // Gets transcript from watson
   // Splits video by transcript
   // Standardizes all audio file lengths
+  // ie. node index.js youtube VKUyezKHNXk english
   case 'scrape':
     scrape(flags[1], flags[2]);
     break;
@@ -41,15 +42,15 @@ switch(flags[0]){
     youtubeScraper.download(flags[1]);
     break;
   // Gets an audiotranscript from watson for an audio file
-  // Pass in a videoId
+  // Pass in a videoId and a language
   // Looks for all audio files in input directory for a subdirectory named for videoId
-  // ie. node index.js watson VKUyezKHNXk
+  // ie. node index.js watson VKUyezKHNXk english
   case 'watson':
-    transcriptParser(flags[1]);
+    transcriptParser(flags[1], flags[2]);
     break;
-  // Pass a videoId
+  // Pass a videoId and a language
   // Looks for transcript.json file prefixed with same name as audiofile
-  // ie. node index.js parse VKUyezKHNXk
+  // ie. node index.js parse VKUyezKHNXk english
   case 'parse':
     audioParser(flags[1], flags[2]);
     break;

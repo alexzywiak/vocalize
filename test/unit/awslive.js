@@ -15,7 +15,7 @@ var util = require('../util');
 
 var filepath = path.join(__dirname, '..', 'testfiles/aws');
 var testfile = path.join(filepath, 'circle.wav');
-var url = 'http://d2oh9tgz5bro4i.cloudfront.net/circle.wav';
+var url = 'http://d2oh9tgz5bro4i.cloudfront.net/public/circle.wav';
 
 var testword = {
   s3: {
